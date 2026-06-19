@@ -15,7 +15,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Matrix3 } from '@/math/Matrix3';
 import { Vector2 } from '@/math/Vector2';
-import { BodyType } from '@/physics/Body';
+import { Body, BodyType } from '@/physics/Body';
 import { Engine } from '@/physics/Engine';
 
 const { engine } = defineProps<{ engine: Engine }>();
