@@ -1,0 +1,17 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-space-black: #0b090a;
+  --color-orbit-blue: #4cc9f0;
+  --color-event-pink: #f72585;
+}
+
+:root {
+  background-color: var(--color-space-black);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
