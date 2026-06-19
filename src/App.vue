@@ -35,7 +35,7 @@ const engine = reactive(new Engine());
 const isPaused = ref(false);
 const spawnMode = ref(BodyType.PLANET);
 const objMass = ref(100);
-const objRadius = ref(10);
+const objRadius = ref(20);
 
 const lastTime = ref(0);
 
@@ -60,7 +60,8 @@ function handleCanvasClick(worldPosition: Vector2): void {
       ? `hsl(${Math.floor(Math.random() * 360)}, 85%, 65%)`
       : '#000';
   const bodyMass = spawnMode.value === BodyType.PLANET ? objMass.value : objMass.value * 10;
-  const bodyRadius = spawnMode.value === BodyType.PLANET ? objRadius.value : objRadius.value * 2;
+  const bodyRadius =
+    (spawnMode.value === BodyType.PLANET ? objRadius.value : objRadius.value * 2.5) * 1.5;
 
   // For planets, give them some initial tangential velocity for an orbit
   let initialVelocity = new Vector2(0, 0);

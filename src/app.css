@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 
 @theme {
+  --color-accent: #ffa94d;
   --color-space-black: #0b090a;
 }
 

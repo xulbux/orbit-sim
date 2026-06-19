@@ -220,7 +220,15 @@ function draw(): void {
       context.fill();
 
       const time = Date.now() / 1000;
-      const flicker = Math.sin(time * 15) * 0.05;
+
+      // Highly chaotic base flicker
+      let flicker =
+        Math.sin(time * 43) * 0.03 + Math.sin(time * 17) * 0.04 + (Math.random() * 0.06 - 0.03);
+
+      // Unpredictable, glaring intensity spikes
+      if (Math.random() > 0.92) {
+        flicker += Math.random() * 0.25;
+      }
       const innerGlowRadius = screenRadius * 1.4;
       const innerGlow = context.createRadialGradient(
         screenPosition.x,
