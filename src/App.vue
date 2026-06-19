@@ -9,17 +9,27 @@
       v-model:spawnMode="spawnMode"
       v-model:timeScale="engine.timeScale"
       @clear="engine.clear()" />
+
+    <!-- Screen too small blocker -->
+    <div
+      class="absolute inset-0 z-100 flex flex-col items-center justify-center bg-black/90 p-6 text-center backdrop-blur-md sm:hidden">
+      <h2 class="mb-8 text-2xl font-bold text-white">Screen Too Small</h2>
+      <p class="text-sm leading-relaxed text-gray-300">
+        This physics sandbox requires a larger screen. Please rotate your device or use a desktop
+        browser to interact with the simulation.
+      </p>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
-import CanvasRenderer from './components/CanvasRenderer.vue';
-import UiOverlay from './components/UiOverlay.vue';
-import { Complex } from './math/complex.ts';
-import { Vector2 } from './math/vector2.ts';
-import { Body, BodyType } from './physics/body.ts';
-import { Engine } from './physics/engine.ts';
+import CanvasRenderer from '@/components/CanvasRenderer.vue';
+import UiOverlay from '@/components/UiOverlay.vue';
+import { Complex } from '@/math/complex.ts';
+import { Vector2 } from '@/math/vector2.ts';
+import { Body, BodyType } from '@/physics/body.ts';
+import { Engine } from '@/physics/engine.ts';
 
 const engine = reactive(new Engine());
 const isPaused = ref(false);
