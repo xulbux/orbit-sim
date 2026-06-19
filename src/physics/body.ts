@@ -1,4 +1,4 @@
-import { Vector2 } from '@/math/Vector2';
+import { Vector2 } from '@/math/vector2';
 
 enum BodyType {
   PLANET = 'PLANET',
@@ -41,8 +41,6 @@ class Body {
   public update(deltaTime: number): void {
     if (this.type === BodyType.BLACK_HOLE) {
       // Black holes stay fixed in this simulation for simplicity
-      // or we could let them move if desired.
-      // For now, let's keep them fixed.
       return;
     }
 

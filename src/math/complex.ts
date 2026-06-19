@@ -1,4 +1,4 @@
-import { Vector2 } from './Vector2';
+import { Vector2 } from './vector2';
 
 export class Complex {
   public real: number;
@@ -44,9 +44,7 @@ export class Complex {
     return new Vector2(this.real, this.imaginary);
   }
 
-  /**
-   * Rotates a Vector2 by an angle using complex multiplication.
-   */
+  /** Rotates a Vector2 by an angle using complex multiplication. */
   public static rotateVector(vector: Vector2, theta: number): Vector2 {
     const complexVector = Complex.fromVector2(vector);
     const rotator = Complex.fromAngle(theta);

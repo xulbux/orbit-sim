@@ -1,8 +1,8 @@
-import { Vector2 } from './Vector2';
+import { Vector2 } from './vector2';
 
 /**
- * A 3x3 Matrix for 2D affine transformations.
- * Layout:
+ * A 3×3 Matrix for 2D affine transformations.
+ *
  * [ m0 m3 m6 ]
  * [ m1 m4 m7 ]
  * [ m2 m5 m8 ]

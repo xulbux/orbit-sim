@@ -16,10 +16,10 @@
 import { ref, reactive, onMounted } from 'vue';
 import CanvasRenderer from './components/CanvasRenderer.vue';
 import UiOverlay from './components/UiOverlay.vue';
-import { Complex } from './math/Complex';
-import { Vector2 } from './math/Vector2';
-import { Body, BodyType } from './physics/Body';
-import { Engine } from './physics/Engine';
+import { Complex } from './math/complex.ts';
+import { Vector2 } from './math/vector2.ts';
+import { Body, BodyType } from './physics/body.ts';
+import { Engine } from './physics/engine.ts';
 
 const engine = reactive(new Engine());
 const isPaused = ref(false);
@@ -32,12 +32,15 @@ const lastTime = ref(0);
 function update(time: number): void {
   if (!isPaused.value) {
     const deltaTime = (time - lastTime.value) / 1000;
+
     if (deltaTime < 0.1) {
-      // Cap dt to avoid huge jumps
+      // Cap delta time to avoid huge jumps
       engine.update(deltaTime);
     }
   }
+
   lastTime.value = time;
+
   requestAnimationFrame(update);
 }
 
@@ -45,20 +48,20 @@ function handleCanvasClick(worldPosition: Vector2): void {
   const bodyColor =
     spawnMode.value === BodyType.PLANET
       ? `hsl(${Math.floor(Math.random() * 360)}, 85%, 65%)`
-      : '#f72585';
+      : '#000';
   const bodyMass = spawnMode.value === BodyType.PLANET ? objMass.value : objMass.value * 10;
   const bodyRadius = spawnMode.value === BodyType.PLANET ? objRadius.value : objRadius.value * 2;
 
   // For planets, give them some initial tangential velocity for an orbit
   let initialVelocity = new Vector2(0, 0);
   if (spawnMode.value === BodyType.PLANET && engine.bodies.length > 0) {
-    // Simple heuristic: find nearest body and rotate vector to it by 90 deg
+    // Simple heuristic: find nearest body and rotate vector to it by 90°
     const [centralBody] = engine.bodies;
     const toCenter = centralBody.position.sub(worldPosition);
     const distance = toCenter.magnitude();
     const speed = Math.sqrt((engine.gravitationalConstant * centralBody.mass) / distance);
 
-    // Rotate 90 degrees using complex rotation to get tangential velocity
+    // Rotate 90° using complex rotation to get tangential velocity
     initialVelocity = Complex.rotateVector(toCenter, Math.PI / 2)
       .normalize()
       .multiply(speed);

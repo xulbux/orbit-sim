@@ -13,14 +13,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { Matrix3 } from '@/math/Matrix3';
-import { Vector2 } from '@/math/Vector2';
-import { Body, BodyType } from '@/physics/Body';
-import { Engine } from '@/physics/Engine';
+import { Matrix3 } from '@/math/matrix3';
+import { Vector2 } from '@/math/vector2';
+import { Body, BodyType } from '@/physics/body';
+import { Engine } from '@/physics/engine';
 
 const { engine } = defineProps<{ engine: Engine }>();
 
-const emit = defineEmits<{ (event: 'canvas-click', worldPosition: Vector2): void }>();
+const emit = defineEmits<{ (event: 'canvasClick', worldPosition: Vector2): void }>();
 
 const canvasRef = ref<HTMLCanvasElement | undefined>();
 const containerRef = ref<HTMLDivElement | undefined>();
@@ -122,7 +122,7 @@ function draw(): void {
   context.clearRect(0, 0, canvasElement.width, canvasElement.height);
   const matrix = cameraTransform.value;
 
-  // Draw Subtle Background Grid Dots (VueFlow style)
+  // Draw subtle background grid dots
   let worldSpacing = 50;
   let screenSpacing = worldSpacing * zoomLevel.value;
 
@@ -132,7 +132,7 @@ function draw(): void {
     screenSpacing = worldSpacing * zoomLevel.value;
   }
 
-  // Make the dots physically smaller as you zoom out, down to a 0.5px minimum
+  // Make the dots physically smaller as you zoom out (0.5px minimum)
   const dotScreenSize = Math.max(0.5, 2 * zoomLevel.value);
 
   // Only recreate the pattern canvas if the zoom level meaningfully changed the spacing or dot size
@@ -145,7 +145,7 @@ function draw(): void {
     const pCtx = cachedPatternCanvas.getContext('2d');
     if (pCtx) {
       pCtx.clearRect(0, 0, screenSpacing, screenSpacing);
-      pCtx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+      pCtx.fillStyle = 'rgba(255 255 255 / 0.1)';
       pCtx.beginPath();
       pCtx.arc(screenSpacing / 2, screenSpacing / 2, dotScreenSize, 0, Math.PI * 2);
       pCtx.fill();
@@ -172,7 +172,7 @@ function draw(): void {
     context.restore();
   }
 
-  // 1. Draw all trails first (behind everything)
+  // [1] Draw all trails first
   for (const body of engine.bodies) {
     if (body.trail.length > 1) {
       const trailLength = body.trail.length;
@@ -195,7 +195,7 @@ function draw(): void {
     }
   }
 
-  // 2. Draw Black Holes
+  // [2] Draw black holes
   for (const body of engine.bodies) {
     if (body.type === BodyType.BLACK_HOLE) {
       const screenPosition = matrix.multiplyVector(body.position);
@@ -210,8 +210,8 @@ function draw(): void {
         screenPosition.y,
         outerGlowRadius
       );
-      outerGlow.addColorStop(0, 'rgba(255, 120, 50, 0.25)');
-      outerGlow.addColorStop(0.2, 'rgba(200, 50, 0, 0.05)');
+      outerGlow.addColorStop(0, 'rgba(255 120 50 / 0.25)');
+      outerGlow.addColorStop(0.2, 'rgba(200 50 0 / 0.05)');
       outerGlow.addColorStop(1, 'transparent');
 
       context.beginPath();
@@ -232,8 +232,8 @@ function draw(): void {
       );
 
       const brightAlpha = Math.max(0, Math.min(1, 0.85 + flicker * 1.5));
-      innerGlow.addColorStop(0, `rgba(255, 255, 255, ${brightAlpha})`);
-      innerGlow.addColorStop(0.3, `rgba(255, 220, 150, ${brightAlpha * 0.9})`);
+      innerGlow.addColorStop(0, `rgba(255 255 255 / ${brightAlpha})`);
+      innerGlow.addColorStop(0.3, `rgba(255 220 150 / ${brightAlpha * 0.9})`);
       innerGlow.addColorStop(1, 'transparent');
 
       context.beginPath();
@@ -248,7 +248,7 @@ function draw(): void {
     }
   }
 
-  // 3. Draw Planets (on top of everything)
+  // [3] Draw planets
   for (const body of engine.bodies) {
     if (body.type === BodyType.PLANET && !body.isConsumed) {
       const screenPosition = matrix.multiplyVector(body.position);
@@ -286,10 +286,10 @@ function draw(): void {
         screenPosition.y,
         screenRadius * 1.2
       );
-      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-      gradient.addColorStop(0.2, 'rgba(255, 255, 255, 0)');
-      gradient.addColorStop(0.3, 'rgba(0, 0, 0, 0)');
-      gradient.addColorStop(1, 'rgba(0, 0, 0, 0.9)');
+      gradient.addColorStop(0, 'rgba(255 255 255 / 0.8)');
+      gradient.addColorStop(0.2, 'rgba(255 255 255 / 0)');
+      gradient.addColorStop(0.3, 'rgba(0 0 0 / 0)');
+      gradient.addColorStop(1, 'rgba(0 0 0 / 0.9)');
 
       context.beginPath();
       context.arc(screenPosition.x, screenPosition.y, screenRadius, 0, Math.PI * 2);
@@ -344,7 +344,7 @@ function handleClick(event: MouseEvent): void {
   const inverseMatrix = cameraTransform.value.invert();
   if (inverseMatrix) {
     const worldPosition = inverseMatrix.multiplyVector(screenPosition);
-    emit('canvas-click', worldPosition);
+    emit('canvasClick', worldPosition);
   }
 }
 
