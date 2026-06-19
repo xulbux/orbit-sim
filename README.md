@@ -1,4 +1,4 @@
-# Orbit Sim<a href="#orbit-sim"><img align="right" height="33" src="https://github.com/xulbux/orbit-sim/blob/main/public/favicon.svg?raw=true"></a>
+# Orbit Sim<a href="#orbit-sim"><img align="right" width="34" src="https://github.com/xulbux/orbit-sim/blob/main/public/favicon.svg?raw=true"></a>
 
 A mesmerizing 2D sandbox for simulating gravity and black holes:
 
