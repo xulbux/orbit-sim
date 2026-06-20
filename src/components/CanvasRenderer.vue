@@ -7,7 +7,11 @@
       @mousedown="handleMouseDown"
       @mousemove="handleMouseMove"
       @mouseup="handleMouseUp"
-      @wheel="handleWheel"></canvas>
+      @wheel="handleWheel"
+      @touchstart="handleTouchStart"
+      @touchmove="handleTouchMove"
+      @touchend="handleTouchEnd"
+      @touchcancel="handleTouchEnd"></canvas>
   </div>
 </template>
 
@@ -31,17 +35,11 @@ const zoomLevel = ref(1);
 const cameraOffset = ref(new Vector2(0, 0));
 
 // Panning and State
-const isSpacePressed = ref(false);
 const isDragging = ref(false);
 let hasDragged = false;
 let lastMousePosition = new Vector2(0, 0);
 
-const cursorClass = computed(() => {
-  if (isSpacePressed.value) {
-    return isDragging.value ? 'cursor-grabbing' : 'cursor-grab';
-  }
-  return 'cursor-crosshair';
-});
+const cursorClass = computed(() => (isDragging.value ? 'cursor-grabbing' : 'cursor-crosshair'));
 
 function updateCamera(): void {
   if (!canvasRef.value) {
@@ -177,21 +175,44 @@ function draw(): void {
     if (body.trail.length > 1) {
       const trailLength = body.trail.length;
       context.lineWidth = Math.max(1, 2 * zoomLevel.value);
+      context.strokeStyle = body.color;
 
-      for (let trailIndex = 0; trailIndex < trailLength - 1; trailIndex += 1) {
-        const point1 = matrix.multiplyVector(body.trail[trailIndex]);
-        const point2 = matrix.multiplyVector(body.trail[trailIndex + 1]);
+      // A RadialGradient centered on the planet perfectly simulates a tail fade,
+      // because the oldest points in the trail are physically furthest away from the planet
+      const headPoint = matrix.multiplyVector(body.position);
+      const tailPoint = matrix.multiplyVector(body.trail[0]);
 
-        context.beginPath();
-        context.moveTo(point1.x, point1.y);
-        context.lineTo(point2.x, point2.y);
+      // The radius of the fade is the straight-line distance from the planet to the end of its trail
+      const gradientRadius = Math.max(1, headPoint.distanceTo(tailPoint));
 
-        const opacity = (trailIndex / trailLength) * 0.9;
-        context.strokeStyle = body.color;
-        context.globalAlpha = opacity;
-        context.stroke();
+      const gradient = context.createRadialGradient(
+        headPoint.x,
+        headPoint.y,
+        0,
+        headPoint.x,
+        headPoint.y,
+        gradientRadius
+      );
+
+      // Parse hsl(H, S%, L%) into hsla(H, S%, L%, 0)
+      const transparentColor = body.color.replace('hsl', 'hsla').replace(')', ', 0)');
+
+      gradient.addColorStop(0, body.color);
+      gradient.addColorStop(1, transparentColor);
+
+      context.strokeStyle = gradient;
+      context.lineJoin = 'round';
+      context.lineCap = 'round';
+
+      context.beginPath();
+      context.moveTo(tailPoint.x, tailPoint.y);
+
+      for (let pointIndex = 1; pointIndex < trailLength; pointIndex += 1) {
+        const pt = matrix.multiplyVector(body.trail[pointIndex]);
+        context.lineTo(pt.x, pt.y);
       }
-      context.globalAlpha = 1;
+
+      context.stroke();
     }
   }
 
@@ -320,25 +341,13 @@ function handleResize(): void {
   }
 }
 
-function handleKeyDown(event: KeyboardEvent) {
-  if (event.code === 'Space') {
-    isSpacePressed.value = true;
-  }
-}
-
-function handleKeyUp(event: KeyboardEvent) {
-  if (event.code === 'Space') {
-    isSpacePressed.value = false;
-  }
-}
-
 function handleClick(event: MouseEvent): void {
   if (!canvasRef.value) {
     return;
   }
 
-  // Prevent spawning a planet if we were panning or if Space is held
-  if (hasDragged || isSpacePressed.value) {
+  // Prevent spawning a planet if we were panning
+  if (hasDragged) {
     hasDragged = false;
     return;
   }
@@ -348,7 +357,7 @@ function handleClick(event: MouseEvent): void {
   const screenY = event.clientY - boundingRectangle.top;
   const screenPosition = new Vector2(screenX, screenY);
 
-  // INVERSE MATRIX usage
+  // Inverse matrix usage
   const inverseMatrix = cameraTransform.value.invert();
   if (inverseMatrix) {
     const worldPosition = inverseMatrix.multiplyVector(screenPosition);
@@ -357,8 +366,8 @@ function handleClick(event: MouseEvent): void {
 }
 
 function handleMouseDown(event: MouseEvent): void {
-  if (event.button === 1 || (event.button === 0 && isSpacePressed.value)) {
-    // Middle mouse or Space+Left
+  if (event.button === 0 || event.button === 1) {
+    // Left or Middle mouse
     isDragging.value = true;
     hasDragged = false;
     lastMousePosition = new Vector2(event.clientX, event.clientY);
@@ -413,17 +422,133 @@ function handleWheel(event: WheelEvent): void {
   updateCamera();
 }
 
+// Touch state
+let lastTouchDistance = 0;
+let lastTouchMidpoint = new Vector2(0, 0);
+
+function handleTouchStart(event: TouchEvent): void {
+  // Prevent browser scrolling and synthetic click events
+  event.preventDefault();
+
+  if (!canvasRef.value) {
+    return;
+  }
+
+  if (event.touches.length === 1) {
+    isDragging.value = true;
+    hasDragged = false;
+    lastMousePosition = new Vector2(event.touches[0].clientX, event.touches[0].clientY);
+  } else if (event.touches.length === 2) {
+    isDragging.value = false;
+    hasDragged = true; // Two fingers should not trigger a spawn
+
+    const dx = event.touches[0].clientX - event.touches[1].clientX;
+    const dy = event.touches[0].clientY - event.touches[1].clientY;
+    lastTouchDistance = Math.hypot(dx, dy);
+
+    lastTouchMidpoint = new Vector2(
+      (event.touches[0].clientX + event.touches[1].clientX) / 2,
+      (event.touches[0].clientY + event.touches[1].clientY) / 2
+    );
+  }
+}
+
+function handleTouchMove(event: TouchEvent): void {
+  event.preventDefault();
+
+  if (!canvasRef.value) {
+    return;
+  }
+
+  if (event.touches.length === 1 && isDragging.value) {
+    hasDragged = true;
+    const currentPosition = new Vector2(event.touches[0].clientX, event.touches[0].clientY);
+    const movementDelta = currentPosition.sub(lastMousePosition);
+    cameraOffset.value = cameraOffset.value.add(movementDelta);
+    lastMousePosition = currentPosition;
+    updateCamera();
+  } else if (event.touches.length === 2) {
+    hasDragged = true;
+    const dx = event.touches[0].clientX - event.touches[1].clientX;
+    const dy = event.touches[0].clientY - event.touches[1].clientY;
+    const currentDistance = Math.hypot(dx, dy);
+
+    const currentMidpoint = new Vector2(
+      (event.touches[0].clientX + event.touches[1].clientX) / 2,
+      (event.touches[0].clientY + event.touches[1].clientY) / 2
+    );
+
+    // Pan based on midpoint movement
+    const movementDelta = currentMidpoint.sub(lastTouchMidpoint);
+    cameraOffset.value = cameraOffset.value.add(movementDelta);
+
+    // Zoom based on pinch distance
+    const zoomSensitivity = 0.005;
+    const distanceDelta = currentDistance - lastTouchDistance;
+    const zoomDelta = distanceDelta * zoomSensitivity;
+
+    const boundingRectangle = canvasRef.value.getBoundingClientRect();
+    const screenPosition = new Vector2(
+      currentMidpoint.x - boundingRectangle.left,
+      currentMidpoint.y - boundingRectangle.top
+    );
+
+    const inverseMatrixBefore = cameraTransform.value.invert();
+    if (inverseMatrixBefore) {
+      const worldPosUnderMidpoint = inverseMatrixBefore.multiplyVector(screenPosition);
+
+      zoomLevel.value = Math.max(0.1, Math.min(10, zoomLevel.value + zoomDelta));
+
+      const canvasWidth = canvasRef.value.width;
+      const canvasHeight = canvasRef.value.height;
+      const center = new Vector2(canvasWidth / 2, canvasHeight / 2);
+
+      cameraOffset.value = screenPosition
+        .sub(center)
+        .sub(worldPosUnderMidpoint.multiply(zoomLevel.value));
+    }
+
+    lastTouchDistance = currentDistance;
+    lastTouchMidpoint = currentMidpoint;
+
+    updateCamera();
+  }
+}
+
+function handleTouchEnd(event: TouchEvent): void {
+  event.preventDefault();
+
+  if (event.touches.length === 0) {
+    if (isDragging.value && !hasDragged && canvasRef.value) {
+      // It was a quick tap without movement, so spawn an object!
+      const [touch] = event.changedTouches;
+      const boundingRectangle = canvasRef.value.getBoundingClientRect();
+      const screenX = touch.clientX - boundingRectangle.left;
+      const screenY = touch.clientY - boundingRectangle.top;
+      const screenPosition = new Vector2(screenX, screenY);
+
+      const inverseMatrix = cameraTransform.value.invert();
+      if (inverseMatrix) {
+        const worldPosition = inverseMatrix.multiplyVector(screenPosition);
+        emit('canvasClick', worldPosition);
+      }
+    }
+    isDragging.value = false;
+    hasDragged = false;
+  } else if (event.touches.length === 1) {
+    // If one finger was lifted but the other remains, start tracking that as a pan
+    isDragging.value = true;
+    lastMousePosition = new Vector2(event.touches[0].clientX, event.touches[0].clientY);
+  }
+}
+
 onMounted(() => {
   handleResize();
   globalThis.addEventListener('resize', handleResize);
-  globalThis.addEventListener('keydown', handleKeyDown);
-  globalThis.addEventListener('keyup', handleKeyUp);
   draw();
 });
 
 onUnmounted(() => {
   globalThis.removeEventListener('resize', handleResize);
-  globalThis.removeEventListener('keydown', handleKeyDown);
-  globalThis.removeEventListener('keyup', handleKeyUp);
 });
 </script>

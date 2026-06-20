@@ -144,10 +144,18 @@
       </div>
 
       <div class="mt-2 flex flex-row justify-between text-[0.7rem] text-neutral-50/40">
-        <p class="inline-flex items-center gap-1.25"><HandIcon :size="13" /> Space + Drag to Pan</p>
-        <p class="inline-flex items-center gap-1"><MouseIcon :size="13" /> Wheel to Zoom</p>
+        <p class="inline-flex items-center gap-1.25"><HandIcon :size="13" /> Drag to Pan</p>
+        <p class="inline-flex items-center gap-1">
+          <MouseIcon :size="13" /> Pinch / Scroll to Zoom
+        </p>
       </div>
     </div>
+  </div>
+
+  <div
+    class="pointer-events-none absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3 pt-1 pb-px font-mono leading-none backdrop-blur-md lg:top-5 lg:right-5">
+    <span class="text-lg font-semibold">{{ bodyCount }}</span>
+    <span class="text-sm text-neutral-50/60">{{ bodyCount === 1 ? 'OBJ' : 'OBJS' }}</span>
   </div>
 </template>
 
@@ -169,6 +177,7 @@ import {
 import { BodyType } from '@/physics/body';
 
 defineProps<{
+  bodyCount: number;
   gravitationalConstant: number;
   isPaused: boolean;
   objMass: number;
