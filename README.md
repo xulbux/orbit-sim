@@ -2,7 +2,7 @@
 
 A mesmerizing, high-performance 2D sandbox for simulating gravity, black holes, and orbital mechanics. Built entirely from scratch without external physics libraries.
 
-### **[Play the Live Demo here!](https://xulbux.github.io/orbit-sim)**
+### **<a href="https://xulbux.github.io/orbit-sim" target="_blank">Play the Live Demo here!</a>**
 
 <br>
 <br>
