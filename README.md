@@ -2,8 +2,9 @@
 
 A mesmerizing, high-performance 2D sandbox for simulating gravity, black holes, and orbital mechanics. Built entirely from scratch without external physics libraries.
 
-**[Play the Live Demo here!](https://xulbux.github.io/orbit-sim)**
+### **[Play the Live Demo here!](https://xulbux.github.io/orbit-sim)**
 
+<br>
 <br>
 
 ## Features
@@ -29,6 +30,9 @@ Instead of relying on existing frameworks like Matter.js, this project features 
 -   **Custom Linear Algebra:** Dedicated classes for [2D Vectors](https://github.com/xulbux/orbit-sim/blob/main/src/math/vector2.ts#L1), [3×3 Matrices](https://github.com/xulbux/orbit-sim/blob/main/src/math/matrix3.ts#L10), and [Complex Numbers](https://github.com/xulbux/orbit-sim/blob/main/src/math/complex.ts#L3).
 -   **Complex Rotations:** To calculate perfect orbital velocities, position vectors are [rotated by exactly $90^\circ$](https://github.com/xulbux/orbit-sim/blob/main/src/math/complex.ts#L48) by translating them into the complex plane and multiplying by $i$.
 -   **Affine Transformations:** Screen coordinates are mapped back into the infinite world space by computing the **Determinant** and **Inverse** of the camera's [3×3 transformation matrix](https://github.com/xulbux/orbit-sim/blob/main/src/math/matrix3.ts#L67).
+
+<br>
+<br>
 
 ## Resources & Theory
 
