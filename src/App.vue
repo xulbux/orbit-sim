@@ -10,6 +10,16 @@
       v-model:timeScale="engine.timeScale"
       :body-count="bodyCount"
       @clear="engine.clear()" />
+
+    <!-- Screen too small blocker -->
+    <div
+      class="absolute inset-0 z-100 flex flex-col items-center justify-center bg-black/90 p-6 text-center backdrop-blur-md sm:hidden">
+      <h2 class="mb-8 text-2xl font-bold text-white">Screen Too Narrow</h2>
+      <div class="flex flex-col gap-2 text-sm leading-relaxed text-gray-300">
+        <p>This physics sandbox requires a wider screen.</p>
+        <p>Please rotate your device or use a desktop browser to interact with the simulation.</p>
+      </div>
+    </div>
   </div>
 </template>
 

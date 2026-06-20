@@ -11,7 +11,7 @@ A mesmerizing, high-performance 2D sandbox for simulating gravity, black holes, 
 
 -   **N-Body Gravity Simulation:** Calculates real-time gravitational pull between all celestial bodies using [Newton's laws of universal gravitation](https://github.com/xulbux/orbit-sim/blob/main/src/physics/engine.ts#L47).
 -   **Black Holes:** Spawn singularities that consume matter, featuring [custom accretion disk drag](https://github.com/xulbux/orbit-sim/blob/main/src/physics/engine.ts#L100) and chaotic, sputtering core rendering.
--   **Perfect Orbits:** New planets are [mathematically assigned the exact tangential velocity](https://github.com/xulbux/orbit-sim/blob/main/src/App.vue#L59) needed to form a stable orbit.
+-   **Perfect Orbits:** New planets are [mathematically assigned the exact tangential velocity](https://github.com/xulbux/orbit-sim/blob/main/src/App.vue#L69) needed to form a stable orbit.
 -   **Infinite Canvas:** Pan and zoom seamlessly through space using [custom affine transformations](https://github.com/xulbux/orbit-sim/blob/main/src/components/CanvasRenderer.vue#L360).
 -   **GPU Optimized:** Maintains 60 FPS even when zoomed out, using a [dynamically scaling, GPU-cached background grid](https://github.com/xulbux/orbit-sim/blob/main/src/components/CanvasRenderer.vue#L105).
 
